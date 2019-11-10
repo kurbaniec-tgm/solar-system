@@ -1,6 +1,7 @@
 mod utils;
 
 use wasm_bindgen::prelude::*;
+use std::f64::consts::PI;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
@@ -9,11 +10,21 @@ use wasm_bindgen::prelude::*;
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[wasm_bindgen]
-extern {
-    fn alert(s: &str);
+pub struct Simulation {
+    speed: u64
 }
 
 #[wasm_bindgen]
-pub fn greet() {
-    alert("Hello, solar-system!");
+impl Simulation {
+    #[wasm_bindgen(constructor)]
+    pub fn new() -> Simulation {
+        utils::set_panic_hook();
+        Simulation { speed: 10000000}
+    }
+
+    pub fn earth_rotation(&self, delta: f64) -> f64 {
+        //(360.0 * PI / 180.0) / (86164000.0 / (delta * self.speed as f64))
+        (360.0 / (86164000.0 / (delta * self.speed as f64))) * PI / 180.0
+    }
 }
+
