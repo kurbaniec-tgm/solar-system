@@ -1,0 +1,31 @@
+# EasyPass Pipeline
+trigger:
+  branches:
+    include:
+    - '*'
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+jobs:
+ - job: Build_Solary_System
+   displayName: "Build_Solar_System"
+   steps:
+    - template: _azure-pipelines/rust.yml
+      parameters:
+        toolchain: nightly
+    - template: _azure-pipelines/geckodriver.yml
+    - template: _azure-pipelines/wasm-pack.yml
+
+    - script: |
+        wasm-pack build --release --no-typescript
+      displayName: 'Building WebAssembly'
+
+    - script: |
+        wasm-pack test --headless --firefox
+      displayName: 'Testing WebAssembly'
+
+    - script: |
+        cd $(Build.SourcesDirectory)/www
+        npm run build
+      displayName: 'Building Node App'
