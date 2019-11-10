@@ -27,5 +27,6 @@ jobs:
 
     - script: |
         cd $(Build.SourcesDirectory)/www
+        npm install
         npm run build
       displayName: 'Building Node App'
