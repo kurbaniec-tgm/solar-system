@@ -32,3 +32,4 @@ wasm-pack test --headless --firefox
 * [Orbit lines](https://stackoverflow.com/questions/42087478/create-a-planet-orbit)
 * [Rotation](https://codepen.io/cl4ws0n/pen/eJjQzx?editors=1010)
 * [Earth-Moon Rotation](https://mattloftus.github.io/2016/02/03/threejs-p2/)
+* [Switch Controls](https://stackoverflow.com/questions/11304998/switch-threejs-controls-from-trackball-to-flycontrols-and-vice-versa)
