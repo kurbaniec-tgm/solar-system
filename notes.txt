@@ -11,3 +11,6 @@ https://www.scientificamerican.com/article/how-fast-is-the-earth-mov/
 
 Planetary size ratios
 https://nssdc.gsfc.nasa.gov/planetary/factsheet/planet_table_ratio.html
+
+Orbital period
+https://de.wikipedia.org/wiki/Umlaufzeit

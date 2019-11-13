@@ -44,16 +44,27 @@ const sun = new THREE.Mesh( sunG, sunM );
 sun.position.set(0, 0, 0);
 scene.add(sun);
 
-// TODO Streamline planets
-const earthT = textureLoader.load("resources/earth.jpg");
-const earthG = new THREE.SphereGeometry( 1.0, 32, 32 );
-const earthM = new THREE.MeshBasicMaterial( { map: earthT} );
-const earthB = new THREE.MeshBasicMaterial( { color: 0x00a2ff } );
-const earth = new THREE.Mesh( earthG, earthM );
-earth.baum = "test";
-console.log(earth.baum);
-earth.position.set(0, 0, 20);
-scene.add(earth);
+// Define planets that orbit the sun
+const planets = [];
+// EARTH
+const earth = new (function() {
+    this.texture = textureLoader.load("resources/earth.jpg");;
+    this.geometry = new THREE.SphereGeometry( 1.0, 32, 32 );
+    this.material = new THREE.MeshBasicMaterial( { map: this.texture } );
+    this.basic = new THREE.MeshBasicMaterial( { color: 0x00a2ff } );
+    this.ownRotation = function (delta) {
+        return simulation.earth_rotation(delta)
+    };
+    this.instance = new THREE.Mesh( this.geometry, this.material );
+    this.instance.position.set(0, 0, 20);
+    planets.push(this);
+})();
+
+// Add all planets to the scene
+planets.forEach(function (planet) {
+    scene.add(planet.instance);
+});
+
 
 const r = 20;
 // TODO Modulo Thetha at some point
@@ -70,13 +81,13 @@ window.onresize = function () {
 
 function animate() {
     requestAnimationFrame( animate );
-    //earth.rotateY(0.05);
-    const delta = clock.getDelta();
-    earth.rotateY(simulation.earth_rotation(delta));
-    theta += dTheta;
-    earth.position.x = r * Math.cos(theta);
-    earth.position.z = r * Math.sin(theta);
 
+    const delta = clock.getDelta();
+    earth.instance.rotateY(earth.ownRotation(delta));
+    theta += dTheta;
+    earth.instance.position.x = r * Math.cos(theta);
+    earth.instance.position.z = r * Math.sin(theta);
+    //console.log(JSON.stringify(earth.instance.position));
     //console.log(JSON.stringify(earth.position));
 
     controls.update(delta);
