@@ -26,5 +26,9 @@ impl Simulation {
         //(360.0 * PI / 180.0) / (86164000.0 / (delta * self.speed as f64))
         (360.0 / (86164000.0 / (delta * self.speed as f64))) * PI / 180.0
     }
+
+    pub fn earth_sun_rotation(&self, delta: f64) -> f64 {
+        (360.0 / (31558118400.0 / (delta * self.speed as f64))) * PI / 180.0
+    }
 }
 

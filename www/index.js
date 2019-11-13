@@ -13,6 +13,7 @@ console.log("Radiant: " + simulation.earth_rotation(1.0));
 
 // Three.js initialization
 const clock = new THREE.Clock();
+const fullRotation = 2*Math.PI;
 const container = document.getElementById( 'container' );
 const stats = new Stats();
 container.appendChild( stats.dom );
@@ -53,10 +54,15 @@ const earth = new (function() {
     this.material = new THREE.MeshBasicMaterial( { map: this.texture } );
     this.basic = new THREE.MeshBasicMaterial( { color: 0x00a2ff } );
     this.ownRotation = function (delta) {
-        return simulation.earth_rotation(delta)
+        return simulation.earth_rotation(delta);
+    };
+    this.radius = 20;
+    this.theta = 0;
+    this.sunRotation = function (delta) {
+        return simulation.earth_sun_rotation(delta);
     };
     this.instance = new THREE.Mesh( this.geometry, this.material );
-    this.instance.position.set(0, 0, 20);
+    this.instance.position.set(0, 0, this.radius);
     planets.push(this);
 })();
 
@@ -81,15 +87,31 @@ window.onresize = function () {
 
 function animate() {
     requestAnimationFrame( animate );
-
+    // Get elapsed time
+    const delta = clock.getDelta();
+    // Perform operations on all planets
+    planets.forEach(function (planet) {
+        planet.instance.rotateY(planet.ownRotation(delta));
+        planet.theta += planet.sunRotation(delta);
+        if (planet.theta > fullRotation) {
+            planet.theta -= fullRotation;
+        }
+        planet.instance.position.x = planet.radius * Math.cos(planet.theta);
+        planet.instance.position.z = planet.radius * Math.sin(planet.theta);
+    });
+    /**
     const delta = clock.getDelta();
     earth.instance.rotateY(earth.ownRotation(delta));
     theta += dTheta;
+    if (theta > 2*Math.PI) {
+        theta -= 2*Math.PI;
+    }
     earth.instance.position.x = r * Math.cos(theta);
     earth.instance.position.z = r * Math.sin(theta);
     //console.log(JSON.stringify(earth.instance.position));
     //console.log(JSON.stringify(earth.position));
-
+     */
+    //console.log(theta);
     controls.update(delta);
     stats.update();
     renderer.render( scene, camera );

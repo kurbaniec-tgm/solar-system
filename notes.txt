@@ -3,10 +3,15 @@ Rotation: ~ 23 hrs 56 m 4 s | 82800 + 3360 + 4 = 86164‬ s = 86164000 ms
 1 ° Rotation every 239,34's / 239344,44'
 1 ° * Pi/180 = 0.01745 rad
 ---
-86164000ms = 360 °
+86164000ms = 360°
 1ms = (360 / 86164000) ° or (360 / 86164000) * Pi/180 rad
-
 1000ms = (360 / (86164000 / 1000)) = 0,00417807 ° =
+---
+Sun Orbit: 365,256 days * 86400000 = 31558118400 ms
+31558118400ms = 360°
+1ms = (360 / 31558118400ms) °
+1000ms = (360 / (31558118400ms / 1000)) = 0,00417807 ° =
+---
 https://www.scientificamerican.com/article/how-fast-is-the-earth-mov/
 
 Planetary size ratios
