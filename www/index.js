@@ -36,7 +36,13 @@ const camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.inner
 camera.position.set( -15000, 7000, -3300 );
 camera.rotation.set(-2.2578094173636574, -1.004615448774449, -2.3419978296978265, "XYZ");
 //camera.position.set(0, 0, 0);
-let controls = new OrbitControls( camera, renderer.domElement );
+const controls = new OrbitControls( camera, renderer.domElement );
+controls.keys = {
+    LEFT: 65, //left arrow
+    UP: 87, // up arrow
+    RIGHT: 68, // right arrow
+    BOTTOM: 83 // down arrow
+};
 //let controls = new FirstPersonControls( camera, renderer.domElement );
 //controls.target.set( 0, 0.5, 0 );
 // controls.enablePan = false;
@@ -86,6 +92,25 @@ const earth = new (function() {
     planets.push(this);
 })();
 
+const moon = new (function() {
+    this.radius = 347.755;
+    this.texture = textureLoader.load("resources/moon.jpg");
+    this.geometry = new THREE.SphereGeometry( this.radius, 32, 32 );
+    this.material = new THREE.MeshBasicMaterial( { map: this.texture } );
+    this.basic = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+    this.ownRotation = function (delta) {
+        return simulation.sun_rotation(delta);
+    };
+    this.earthDistance = 796.00; // 149.600.000km
+    this.theta = 0;
+    this.earthRotation = function (delta) {
+        return 2 * simulation.earth_sun_rotation(delta);
+    };
+    this.instance = new THREE.Mesh( this.geometry, this.material );
+    this.instance.position.set(0, 0, 1000);
+    scene.add(this.instance);
+})();
+
 const mars = new (function() {
     this.radius = 250.855;
     this.texture = textureLoader.load("resources/mars.jpg");
@@ -123,7 +148,25 @@ function animate() {
     // Get elapsed time
     const delta = clock.getDelta();
     // Perform operations on all planets
+    //moon.theta += moon.earthRotation(delta);
+
+    /**moon.theta += 2 * Math.PI / 1000 ;
+    let x, z;
+    x = moon.earthDistance;
+    z = 0;
+    x = x * Math.cos(moon.theta) - z * Math.sin(moon.theta);
+    z = x * Math.sin(moon.theta) + z * Math.cos(moon.theta);
+    moon.instance.position.x = earth.instance.position.x + x;
+    moon.instance.position.z = earth.instance.position.z + z;*/
+
+    moon.theta += simulation.earth_rotation(delta);
+    moon.instance.position.x = earth.instance.position.x + moon.earthDistance * Math.cos(moon.theta);
+    moon.instance.position.z = earth.instance.position.z + moon.earthDistance * Math.sin(moon.theta);
+    //moon.instance.position.x = earth.instance.position.x + moon.earthDistance * Math.cos(moon.theta);
+    //moon.instance.position.z = earth.instance.position.z + moon.earthDistance * Math.sin(moon.theta);
+
     sun.instance.rotateY(sun.ownRotation(delta));
+
     planets.forEach(function (planet) {
         planet.instance.rotateY(planet.ownRotation(delta));
         planet.theta += planet.sunRotation(delta);
