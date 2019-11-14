@@ -20,7 +20,11 @@ https://www.scientificamerican.com/article/how-fast-is-the-earth-mov/
 Rotation ~ 24 hrs 37 m = 86400000 + 2160000 ms = 88560000 ms
 ---
 Sun Orbit: 686,98 days = 59355072000 ms
-
+---
+# Moon
+Rotation: 27,32 days = 2360448000 ms
+Earth Orbit: 27,32 days = 2360448000 ms
+---
 
 Planetary size ratios
 https://nssdc.gsfc.nasa.gov/planetary/factsheet/planet_table_ratio.html

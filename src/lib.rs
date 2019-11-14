@@ -22,13 +22,19 @@ impl Simulation {
         Simulation { speed: 10000000}
     }
 
+    pub fn reduce_speed(&mut self) {
+        self.speed = self.speed / 10;
+    }
+
+    pub fn increase_speed(&mut self) {
+        self.speed = self.speed * 10;
+    }
+
     pub fn sun_rotation(&self, delta: f64) -> f64 {
-        //(360.0 * PI / 180.0) / (86164000.0 / (delta * self.speed as f64))
         (360.0 / (2114208000.0 / (delta * self.speed as f64))) * PI / 180.0
     }
 
     pub fn earth_rotation(&self, delta: f64) -> f64 {
-        //(360.0 * PI / 180.0) / (86164000.0 / (delta * self.speed as f64))
         (360.0 / (86164000.0 / (delta * self.speed as f64))) * PI / 180.0
     }
 
@@ -36,8 +42,11 @@ impl Simulation {
         (360.0 / (31558118400.0 / (delta * self.speed as f64))) * PI / 180.0
     }
 
+    pub fn moon_rotation(&self, delta: f64) -> f64 {
+        (360.0 / (2360448000.0 / (delta * self.speed as f64))) * PI / 180.0
+    }
+
     pub fn mars_rotation(&self, delta: f64) -> f64 {
-        //(360.0 * PI / 180.0) / (86164000.0 / (delta * self.speed as f64))
         (360.0 / (88560000.0 / (delta * self.speed as f64))) * PI / 180.0
     }
 

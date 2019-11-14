@@ -43,19 +43,27 @@ controls.keys = {
     RIGHT: 68, // right arrow
     BOTTOM: 83 // down arrow
 };
-//let controls = new FirstPersonControls( camera, renderer.domElement );
-//controls.target.set( 0, 0.5, 0 );
-// controls.enablePan = false;
+/**
 scene.add( new THREE.AmbientLight( 0x404040 ) );
 const pointLight = new THREE.PointLight( 0xffffff, 1 );
 pointLight.position.copy( camera.position );
-scene.add( pointLight );
-
-// KeyListener
-const movement = [false, false, false, false];
+scene.add( pointLight );*/
 
 const textureLoader = new THREE.TextureLoader();
 
+const galaxy = new (function () {
+    this.geometry = new THREE.SphereGeometry(100000, 50, 50);
+    this.material = new THREE.MeshPhongMaterial(
+        {
+            map: textureLoader.load("resources/galaxy.png"),
+            side: THREE.DoubleSide,
+            shininess: 0
+        }
+    );
+    this.basic = new THREE.MeshBasicMaterial( { color: 0x000 } );
+    this.instance = new THREE.Mesh(this.geometry, this.material);
+    scene.add(this.instance);
+});
 const sun = new (function() {
     this.radius = 3477.55;
     this.texture = textureLoader.load("resources/sun.jpg");
@@ -67,14 +75,16 @@ const sun = new (function() {
     };
     this.instance = new THREE.Mesh( this.geometry, this.material );
     this.instance.position.set(0, 0, 0);
+    this.light = new THREE.AmbientLight( 0x404040, 0.3 ); // soft white light
     scene.add(this.instance);
+    scene.add(this.light);
 })();
 
 // Define planets that orbit the sun
 const planets = [];
 // EARTH
 const earth = new (function() {
-    this.radius = 310.855;
+    this.radius = 318.5;
     this.texture = textureLoader.load("resources/earth.jpg");
     this.geometry = new THREE.SphereGeometry( this.radius, 32, 32 );
     this.material = new THREE.MeshBasicMaterial( { map: this.texture } );
@@ -88,29 +98,26 @@ const earth = new (function() {
         return simulation.earth_sun_rotation(delta);
     };
     this.instance = new THREE.Mesh( this.geometry, this.material );
-    this.instance.position.set(0, 0, 10.00);
+    // this.instance.position.set(0, 0, 10.00);
     planets.push(this);
 })();
-
+// MOON orbits earth
 const moon = new (function() {
-    this.radius = 347.755;
+    this.radius = 86.855;
     this.texture = textureLoader.load("resources/moon.jpg");
     this.geometry = new THREE.SphereGeometry( this.radius, 32, 32 );
     this.material = new THREE.MeshBasicMaterial( { map: this.texture } );
     this.basic = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
-    this.ownRotation = function (delta) {
-        return simulation.sun_rotation(delta);
-    };
-    this.earthDistance = 796.00; // 149.600.000km
+    this.earthDistance = 784.400; // 384400km
     this.theta = 0;
-    this.earthRotation = function (delta) {
-        return 2 * simulation.earth_sun_rotation(delta);
+    this.rotation = function (delta) {
+        return simulation.moon_rotation(delta);
     };
     this.instance = new THREE.Mesh( this.geometry, this.material );
-    this.instance.position.set(0, 0, 1000);
+    // this.instance.position.set(0, 0, 1000);
     scene.add(this.instance);
 })();
-
+// MARS
 const mars = new (function() {
     this.radius = 250.855;
     this.texture = textureLoader.load("resources/mars.jpg");
@@ -126,7 +133,26 @@ const mars = new (function() {
         return simulation.mars_sun_rotation(delta);
     };
     this.instance = new THREE.Mesh( this.geometry, this.material );
-    this.instance.position.set(0, 0, 10.00);
+    //this.instance.position.set(0, 0, 10.00);
+    planets.push(this);
+})();
+
+const jupiter = new (function() {
+    this.radius = 1500.855;
+    this.texture = textureLoader.load("resources/mars.jpg");
+    this.geometry = new THREE.SphereGeometry( this.radius, 32, 32 );
+    this.material = new THREE.MeshBasicMaterial( { map: this.texture } );
+    this.basic = new THREE.MeshBasicMaterial( { color: 0x00a2ff } );
+    this.ownRotation = function (delta) {
+        return simulation.mars_rotation(delta);
+    };
+    this.sunDistance = 14960.00; // 149.600.000km
+    this.theta = 0;
+    this.sunRotation = function (delta) {
+        return simulation.mars_sun_rotation(delta);
+    };
+    this.instance = new THREE.Mesh( this.geometry, this.material );
+    //this.instance.position.set(0, 0, 10.00);
     planets.push(this);
 })();
 
@@ -147,26 +173,15 @@ function animate() {
     requestAnimationFrame( animate );
     // Get elapsed time
     const delta = clock.getDelta();
-    // Perform operations on all planets
-    //moon.theta += moon.earthRotation(delta);
-
-    /**moon.theta += 2 * Math.PI / 1000 ;
-    let x, z;
-    x = moon.earthDistance;
-    z = 0;
-    x = x * Math.cos(moon.theta) - z * Math.sin(moon.theta);
-    z = x * Math.sin(moon.theta) + z * Math.cos(moon.theta);
-    moon.instance.position.x = earth.instance.position.x + x;
-    moon.instance.position.z = earth.instance.position.z + z;*/
-
-    moon.theta += simulation.earth_rotation(delta);
+    // Perform sun operations
+    sun.instance.rotateY(sun.ownRotation(delta));
+    // Perform moon operations
+    const moonRotation = moon.rotation(delta);
+    moon.theta += moonRotation;
     moon.instance.position.x = earth.instance.position.x + moon.earthDistance * Math.cos(moon.theta);
     moon.instance.position.z = earth.instance.position.z + moon.earthDistance * Math.sin(moon.theta);
-    //moon.instance.position.x = earth.instance.position.x + moon.earthDistance * Math.cos(moon.theta);
-    //moon.instance.position.z = earth.instance.position.z + moon.earthDistance * Math.sin(moon.theta);
-
-    sun.instance.rotateY(sun.ownRotation(delta));
-
+    moon.instance.rotateY(moonRotation);
+    // Perform operations on all planets that orbit the sun
     planets.forEach(function (planet) {
         planet.instance.rotateY(planet.ownRotation(delta));
         planet.theta += planet.sunRotation(delta);
