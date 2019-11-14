@@ -1,3 +1,6 @@
+# Sun
+Rotation: ~ 24,47 days = 2114208000 ms
+---
 # Earth
 Rotation: ~ 23 hrs 56 m 4 s | 82800 + 3360 + 4 = 86164‬ s = 86164000 ms
 1 ° Rotation every 239,34's / 239344,44'
@@ -11,8 +14,13 @@ Sun Orbit: 365,256 days * 86400000 = 31558118400 ms
 31558118400ms = 360°
 1ms = (360 / 31558118400ms) °
 1000ms = (360 / (31558118400ms / 1000)) = 0,00417807 ° =
----
 https://www.scientificamerican.com/article/how-fast-is-the-earth-mov/
+---
+# Mars
+Rotation ~ 24 hrs 37 m = 86400000 + 2160000 ms = 88560000 ms
+---
+Sun Orbit: 686,98 days = 59355072000 ms
+
 
 Planetary size ratios
 https://nssdc.gsfc.nasa.gov/planetary/factsheet/planet_table_ratio.html

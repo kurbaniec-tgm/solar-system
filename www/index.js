@@ -10,6 +10,7 @@ import {FirstPersonControls} from "three/examples/jsm/controls/FirstPersonContro
 import {FlyControls} from "three/examples/jsm/controls/FlyControls";
 import {Vector3} from "three";
 import {PointerLockControls} from "three/examples/jsm/controls/PointerLockControls";
+import {Euler} from "three";
 
 // Initialize WebAssembly
 const simulation = new wasm.Simulation();
@@ -33,8 +34,10 @@ scene.background = new THREE.Color( 0xbfe3dd );
 const camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 1, 1000000 );
 // Note: x is forward/backward, z is left/right, y is top/bottom
 camera.position.set( -15000, 7000, -3300 );
+camera.rotation.set(-2.2578094173636574, -1.004615448774449, -2.3419978296978265, "XYZ");
 //camera.position.set(0, 0, 0);
 let controls = new OrbitControls( camera, renderer.domElement );
+//let controls = new FirstPersonControls( camera, renderer.domElement );
 //controls.target.set( 0, 0.5, 0 );
 // controls.enablePan = false;
 scene.add( new THREE.AmbientLight( 0x404040 ) );
@@ -46,18 +49,24 @@ scene.add( pointLight );
 const movement = [false, false, false, false];
 
 const textureLoader = new THREE.TextureLoader();
-const sunT = textureLoader.load("resources/sun.jpg");
-const sunG = new THREE.SphereGeometry( 3477.55, 32, 32 );
-const sunM = new THREE.MeshBasicMaterial( { map: sunT} );
-const sunB = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
-const sun = new THREE.Mesh( sunG, sunM );
-sun.position.set(0, 0, 0);
-scene.add(sun);
+
+const sun = new (function() {
+    this.radius = 3477.55;
+    this.texture = textureLoader.load("resources/sun.jpg");
+    this.geometry = new THREE.SphereGeometry( this.radius, 32, 32 );
+    this.material = new THREE.MeshBasicMaterial( { map: this.texture } );
+    this.basic = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+    this.ownRotation = function (delta) {
+        return simulation.sun_rotation(delta);
+    };
+    this.instance = new THREE.Mesh( this.geometry, this.material );
+    this.instance.position.set(0, 0, 0);
+    scene.add(this.instance);
+})();
 
 // Define planets that orbit the sun
 const planets = [];
 // EARTH
-//
 const earth = new (function() {
     this.radius = 310.855;
     this.texture = textureLoader.load("resources/earth.jpg");
@@ -67,13 +76,32 @@ const earth = new (function() {
     this.ownRotation = function (delta) {
         return simulation.earth_rotation(delta);
     };
-    this.sunDistance = 14960.00;
+    this.sunDistance = 7960.00; // 149.600.000km
     this.theta = 0;
     this.sunRotation = function (delta) {
         return simulation.earth_sun_rotation(delta);
     };
     this.instance = new THREE.Mesh( this.geometry, this.material );
-    this.instance.position.set(0, 0, 1000.00);
+    this.instance.position.set(0, 0, 10.00);
+    planets.push(this);
+})();
+
+const mars = new (function() {
+    this.radius = 250.855;
+    this.texture = textureLoader.load("resources/mars.jpg");
+    this.geometry = new THREE.SphereGeometry( this.radius, 32, 32 );
+    this.material = new THREE.MeshBasicMaterial( { map: this.texture } );
+    this.basic = new THREE.MeshBasicMaterial( { color: 0x00a2ff } );
+    this.ownRotation = function (delta) {
+        return simulation.mars_rotation(delta);
+    };
+    this.sunDistance = 10960.00; // 149.600.000km
+    this.theta = 0;
+    this.sunRotation = function (delta) {
+        return simulation.mars_sun_rotation(delta);
+    };
+    this.instance = new THREE.Mesh( this.geometry, this.material );
+    this.instance.position.set(0, 0, 10.00);
     planets.push(this);
 })();
 
@@ -82,12 +110,6 @@ planets.forEach(function (planet) {
     scene.add(planet.instance);
 });
 
-controls.update(1.0);
-const newCam = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 1, 1000000 );
-newCam.position.copy(camera.position);
-newCam.rotation.copy(camera.rotation);
-controls = new PointerLockControls(newCam, renderer.domElement);
-controls.connect();
 animate();
 
 window.onresize = function () {
@@ -101,6 +123,7 @@ function animate() {
     // Get elapsed time
     const delta = clock.getDelta();
     // Perform operations on all planets
+    sun.instance.rotateY(sun.ownRotation(delta));
     planets.forEach(function (planet) {
         planet.instance.rotateY(planet.ownRotation(delta));
         planet.theta += planet.sunRotation(delta);
@@ -110,18 +133,8 @@ function animate() {
         planet.instance.position.x = planet.sunDistance * Math.cos(planet.theta);
         planet.instance.position.z = planet.sunDistance * Math.sin(planet.theta);
     });
+
     /**
-    const delta = clock.getDelta();
-    earth.instance.rotateY(earth.ownRotation(delta));
-    theta += dTheta;
-    if (theta > 2*Math.PI) {
-        theta -= 2*Math.PI;
-    }
-    earth.instance.position.x = r * Math.cos(theta);
-    earth.instance.position.z = r * Math.sin(theta);
-    //console.log(JSON.stringify(earth.instance.position));
-    //console.log(JSON.stringify(earth.position));
-     */
     if (movement[0]) {
         camera.position.x = camera.position.x + 100;
     } else if (movement[1]) {
@@ -130,15 +143,17 @@ function animate() {
         camera.position.z = camera.position.z - 100;
     } else if (movement[3]) {
         camera.position.z = camera.position.z + 100;
-    }
+    }*/
+    controls.update(delta);
     camera.clearViewOffset();
-    console.log(JSON.stringify(camera.position));
-
+    //console.log("new: " + JSON.stringify(newCam.position));
+    console.log("old: " + JSON.stringify(camera.position));
     stats.update();
 
     renderer.render( scene, camera );
 }
 
+/**
 document.addEventListener('keydown', (e) => {
     switch (e.code) {
         case 'KeyW':
@@ -171,4 +186,4 @@ document.addEventListener('keyup', (e) => {
             movement[3] = false;
             break;
     }
-});
+});*/
