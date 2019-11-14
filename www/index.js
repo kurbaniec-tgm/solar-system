@@ -30,29 +30,34 @@ renderer.gammaFactor = 2.2;
 container.appendChild( renderer.domElement );
 const scene = new THREE.Scene();
 
-scene.background = new THREE.Color( 0xbfe3dd );
 const camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 1, 1000000 );
 // Note: x is forward/backward, z is left/right, y is top/bottom
 camera.position.set( -15000, 7000, -3300 );
 camera.rotation.set(-2.2578094173636574, -1.004615448774449, -2.3419978296978265, "XYZ");
-//camera.position.set(0, 0, 0);
+
 const controls = new OrbitControls( camera, renderer.domElement );
 controls.keys = {
-    LEFT: 65, //left arrow
-    UP: 87, // up arrow
-    RIGHT: 68, // right arrow
-    BOTTOM: 83 // down arrow
+    LEFT: 65, // A
+    UP: 87, // W
+    RIGHT: 68, // D
+    BOTTOM: 83 // S
 };
-/**
-scene.add( new THREE.AmbientLight( 0x404040 ) );
-const pointLight = new THREE.PointLight( 0xffffff, 1 );
-pointLight.position.copy( camera.position );
-scene.add( pointLight );*/
-
 const textureLoader = new THREE.TextureLoader();
 
+// Saves every object in the solar system
+const everything = [];
+// Define planets that orbit the sun
+const planets = [];
+// Flag that determines if textures should be used
+let textureFlag = true;
+// Flag that determines if lightning should be used
+let lightningFlag = true;
+// Flag that determines if simulation is paused
+let pause = false;
+
+// GALAXY
 const galaxy = new (function () {
-    this.geometry = new THREE.SphereGeometry(100000, 50, 50);
+    this.geometry = new THREE.SphereGeometry(500000, 50, 50);
     this.material = new THREE.MeshPhongMaterial(
         {
             map: textureLoader.load("resources/galaxy.png"),
@@ -63,103 +68,202 @@ const galaxy = new (function () {
     this.basic = new THREE.MeshBasicMaterial( { color: 0x000 } );
     this.instance = new THREE.Mesh(this.geometry, this.material);
     scene.add(this.instance);
+    everything.push(this);
 });
+// SUN
 const sun = new (function() {
     this.radius = 3477.55;
     this.texture = textureLoader.load("resources/sun.jpg");
     this.geometry = new THREE.SphereGeometry( this.radius, 32, 32 );
-    this.material = new THREE.MeshBasicMaterial( { map: this.texture } );
+    this.material = new THREE.MeshLambertMaterial( { map: this.texture } );
     this.basic = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
     this.ownRotation = function (delta) {
         return simulation.sun_rotation(delta);
     };
     this.instance = new THREE.Mesh( this.geometry, this.material );
     this.instance.position.set(0, 0, 0);
-    this.light = new THREE.AmbientLight( 0x404040, 0.3 ); // soft white light
+    this.lightIntensity = 3;
+    this.light = new THREE.AmbientLight( 0x404040, this.lightIntensity ); // soft white light
     scene.add(this.instance);
     scene.add(this.light);
+    everything.push(this);
 })();
-
-// Define planets that orbit the sun
-const planets = [];
+// MERCURY
+const mercury = new (function() {
+    this.radius = 180.0;
+    this.texture = textureLoader.load("resources/mercury.jpg");
+    this.geometry = new THREE.SphereGeometry( this.radius, 32, 32 );
+    this.material = new THREE.MeshLambertMaterial( { map: this.texture } );
+    this.basic = new THREE.MeshBasicMaterial( { color: 0xdec692 } );
+    this.ownRotation = function (delta) {
+        return simulation.mercury_rotation(delta);
+    };
+    this.sunDistance = 5000.00; // 149.600.000km
+    this.theta = 0;
+    this.sunRotation = function (delta) {
+        return simulation.mercury_sun_rotation(delta);
+    };
+    this.instance = new THREE.Mesh( this.geometry, this.material );
+    scene.add(this.instance);
+    planets.push(this);
+    everything.push(this);
+})();
+// VENUS
+const venus = new (function() {
+    this.radius = 318.0;
+    this.texture = textureLoader.load("resources/venus.jpg");
+    this.geometry = new THREE.SphereGeometry( this.radius, 32, 32 );
+    this.material = new THREE.MeshLambertMaterial( { map: this.texture } );
+    this.basic = new THREE.MeshBasicMaterial( { color: 0xdec692 } );
+    this.ownRotation = function (delta) {
+        return simulation.venus_rotation(delta);
+    };
+    this.sunDistance = 7000.00; // 149.600.000km
+    this.theta = 0;
+    this.sunRotation = function (delta) {
+        return simulation.venus_sun_rotation(delta);
+    };
+    this.instance = new THREE.Mesh( this.geometry, this.material );
+    scene.add(this.instance);
+    planets.push(this);
+    everything.push(this);
+})();
 // EARTH
 const earth = new (function() {
     this.radius = 318.5;
     this.texture = textureLoader.load("resources/earth.jpg");
     this.geometry = new THREE.SphereGeometry( this.radius, 32, 32 );
-    this.material = new THREE.MeshBasicMaterial( { map: this.texture } );
+    this.material = new THREE.MeshLambertMaterial( { map: this.texture } );
     this.basic = new THREE.MeshBasicMaterial( { color: 0x00a2ff } );
     this.ownRotation = function (delta) {
         return simulation.earth_rotation(delta);
     };
-    this.sunDistance = 7960.00; // 149.600.000km
+    this.sunDistance = 9000.00; // 149.600.000km
     this.theta = 0;
     this.sunRotation = function (delta) {
         return simulation.earth_sun_rotation(delta);
     };
     this.instance = new THREE.Mesh( this.geometry, this.material );
-    // this.instance.position.set(0, 0, 10.00);
+    scene.add(this.instance);
     planets.push(this);
+    everything.push(this);
 })();
 // MOON orbits earth
 const moon = new (function() {
     this.radius = 86.855;
     this.texture = textureLoader.load("resources/moon.jpg");
     this.geometry = new THREE.SphereGeometry( this.radius, 32, 32 );
-    this.material = new THREE.MeshBasicMaterial( { map: this.texture } );
-    this.basic = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+    this.material = new THREE.MeshLambertMaterial( { map: this.texture } );
+    this.basic = new THREE.MeshBasicMaterial( { color: 0xbdbdbd } );
     this.earthDistance = 784.400; // 384400km
     this.theta = 0;
     this.rotation = function (delta) {
         return simulation.moon_rotation(delta);
     };
     this.instance = new THREE.Mesh( this.geometry, this.material );
-    // this.instance.position.set(0, 0, 1000);
     scene.add(this.instance);
+    everything.push(this);
 })();
 // MARS
 const mars = new (function() {
     this.radius = 250.855;
     this.texture = textureLoader.load("resources/mars.jpg");
     this.geometry = new THREE.SphereGeometry( this.radius, 32, 32 );
-    this.material = new THREE.MeshBasicMaterial( { map: this.texture } );
-    this.basic = new THREE.MeshBasicMaterial( { color: 0x00a2ff } );
+    this.material = new THREE.MeshLambertMaterial( { map: this.texture } );
+    this.basic = new THREE.MeshBasicMaterial( { color: 0xa10606 } );
     this.ownRotation = function (delta) {
         return simulation.mars_rotation(delta);
     };
-    this.sunDistance = 10960.00; // 149.600.000km
+    this.sunDistance = 11000.00; // 149.600.000km
     this.theta = 0;
     this.sunRotation = function (delta) {
         return simulation.mars_sun_rotation(delta);
     };
     this.instance = new THREE.Mesh( this.geometry, this.material );
-    //this.instance.position.set(0, 0, 10.00);
+    scene.add(this.instance);
     planets.push(this);
+    everything.push(this);
 })();
-
+// JUPITER
 const jupiter = new (function() {
     this.radius = 1500.855;
-    this.texture = textureLoader.load("resources/mars.jpg");
+    this.texture = textureLoader.load("resources/jupiter.jpg");
     this.geometry = new THREE.SphereGeometry( this.radius, 32, 32 );
-    this.material = new THREE.MeshBasicMaterial( { map: this.texture } );
-    this.basic = new THREE.MeshBasicMaterial( { color: 0x00a2ff } );
+    this.material = new THREE.MeshLambertMaterial( { map: this.texture } );
+    this.basic = new THREE.MeshBasicMaterial( { color: 0xffe1b8 } );
     this.ownRotation = function (delta) {
-        return simulation.mars_rotation(delta);
+        return simulation.jupiter_rotation(delta);
     };
-    this.sunDistance = 14960.00; // 149.600.000km
+    this.sunDistance = 14000.00; // 149.600.000km
     this.theta = 0;
     this.sunRotation = function (delta) {
-        return simulation.mars_sun_rotation(delta);
+        return simulation.jupiter_sun_rotation(delta);
     };
     this.instance = new THREE.Mesh( this.geometry, this.material );
-    //this.instance.position.set(0, 0, 10.00);
+    scene.add(this.instance);
     planets.push(this);
+    everything.push(this);
 })();
-
-// Add all planets to the scene
-planets.forEach(function (planet) {
-    scene.add(planet.instance);
-});
+// SATURN
+const saturn = new (function() {
+    this.radius = 1400.0;
+    this.texture = textureLoader.load("resources/saturn.jpg");
+    this.geometry = new THREE.SphereGeometry( this.radius, 32, 32 );
+    this.material = new THREE.MeshLambertMaterial( { map: this.texture } );
+    this.basic = new THREE.MeshBasicMaterial( { color: 0xfff0db } );
+    this.ownRotation = function (delta) {
+        return simulation.saturn_rotation(delta);
+    };
+    this.sunDistance = 17500.00; // 149.600.000km
+    this.theta = 0;
+    this.sunRotation = function (delta) {
+        return simulation.saturn_sun_rotation(delta);
+    };
+    this.instance = new THREE.Mesh( this.geometry, this.material );
+    scene.add(this.instance);
+    planets.push(this);
+    everything.push(this);
+})();
+// URANUS
+const uranus = new (function() {
+    this.radius = 800.0;
+    this.texture = textureLoader.load("resources/uranus.jpg");
+    this.geometry = new THREE.SphereGeometry( this.radius, 32, 32 );
+    this.material = new THREE.MeshLambertMaterial( { map: this.texture } );
+    this.basic = new THREE.MeshBasicMaterial( { color: 0xb0ceff } );
+    this.ownRotation = function (delta) {
+        return simulation.uranus_rotation(delta);
+    };
+    this.sunDistance = 20000.00; // 149.600.000km
+    this.theta = 0;
+    this.sunRotation = function (delta) {
+        return simulation.uranus_sun_rotation(delta);
+    };
+    this.instance = new THREE.Mesh( this.geometry, this.material );
+    scene.add(this.instance);
+    planets.push(this);
+    everything.push(this);
+})();
+// NEPTUNE
+const neptune = new (function() {
+    this.radius = 800.0;
+    this.texture = textureLoader.load("resources/neptune.jpg");
+    this.geometry = new THREE.SphereGeometry( this.radius, 32, 32 );
+    this.material = new THREE.MeshLambertMaterial( { map: this.texture } );
+    this.basic = new THREE.MeshBasicMaterial( { color: 0x4c8df5 } );
+    this.ownRotation = function (delta) {
+        return simulation.neptune_rotation(delta);
+    };
+    this.sunDistance = 22000.00; // 149.600.000km
+    this.theta = 0;
+    this.sunRotation = function (delta) {
+        return simulation.neptune_sun_rotation(delta);
+    };
+    this.instance = new THREE.Mesh( this.geometry, this.material );
+    scene.add(this.instance);
+    planets.push(this);
+    everything.push(this);
+})();
 
 animate();
 
@@ -169,79 +273,95 @@ window.onresize = function () {
     renderer.setSize( window.innerWidth, window.innerHeight );
 };
 
+// Simulation loop
 function animate() {
-    requestAnimationFrame( animate );
+    requestAnimationFrame(animate);
     // Get elapsed time
     const delta = clock.getDelta();
-    // Perform sun operations
-    sun.instance.rotateY(sun.ownRotation(delta));
-    // Perform moon operations
-    const moonRotation = moon.rotation(delta);
-    moon.theta += moonRotation;
-    moon.instance.position.x = earth.instance.position.x + moon.earthDistance * Math.cos(moon.theta);
-    moon.instance.position.z = earth.instance.position.z + moon.earthDistance * Math.sin(moon.theta);
-    moon.instance.rotateY(moonRotation);
-    // Perform operations on all planets that orbit the sun
-    planets.forEach(function (planet) {
-        planet.instance.rotateY(planet.ownRotation(delta));
-        planet.theta += planet.sunRotation(delta);
-        if (planet.theta > fullRotation) {
-            planet.theta -= fullRotation;
-        }
-        planet.instance.position.x = planet.sunDistance * Math.cos(planet.theta);
-        planet.instance.position.z = planet.sunDistance * Math.sin(planet.theta);
-    });
-
-    /**
-    if (movement[0]) {
-        camera.position.x = camera.position.x + 100;
-    } else if (movement[1]) {
-        camera.position.x = camera.position.x - 100;
-    } else if (movement[2]) {
-        camera.position.z = camera.position.z - 100;
-    } else if (movement[3]) {
-        camera.position.z = camera.position.z + 100;
-    }*/
+    if (!pause) {
+        // Perform sun operations
+        sun.instance.rotateY(sun.ownRotation(delta));
+        // Perform moon operations
+        const moonRotation = moon.rotation(delta);
+        moon.theta += moonRotation;
+        moon.instance.position.x = earth.instance.position.x + moon.earthDistance * Math.cos(moon.theta);
+        moon.instance.position.z = earth.instance.position.z + moon.earthDistance * Math.sin(moon.theta);
+        moon.instance.rotateY(moonRotation);
+        // Perform operations on all planets that orbit the sun
+        planets.forEach(function (planet) {
+            planet.instance.rotateY(planet.ownRotation(delta));
+            planet.theta += planet.sunRotation(delta);
+            if (planet.theta > fullRotation) {
+                planet.theta -= fullRotation;
+            }
+            planet.instance.position.x = planet.sunDistance * Math.cos(planet.theta);
+            planet.instance.position.z = planet.sunDistance * Math.sin(planet.theta);
+        });
+    }
     controls.update(delta);
     camera.clearViewOffset();
-    //console.log("new: " + JSON.stringify(newCam.position));
-    console.log("old: " + JSON.stringify(camera.position));
     stats.update();
-
-    renderer.render( scene, camera );
+    renderer.render(scene, camera);
 }
 
-/**
+
 document.addEventListener('keydown', (e) => {
     switch (e.code) {
-        case 'KeyW':
-            movement[0] = true;
+        case 'ArrowUp':
+            simulation.increase_speed();
             break;
-        case 'KeyS':
-            movement[1] = true;
+        case 'ArrowDown':
+            simulation.reduce_speed();
             break;
-        case 'KeyA':
-            movement[2] = true;
+        case 'KeyT':
+            toogleTextures();
             break;
-        case 'KeyD':
-            movement[3] = true;
+        case 'KeyL':
+            toggleLightning();
+            break;
+        case 'Space':
+            togglePause();
             break;
     }
 });
 
-document.addEventListener('keyup', (e) => {
-    switch (e.code) {
-        case 'KeyW':
-            movement[0] = false;
+/**
+document.addEventListener('mousedown', (e) => {
+    switch (e.button) {
+        case 0: // Left mouse click
+            toogleTextures();
             break;
-        case 'KeyS':
-            movement[1] = false;
-            break;
-        case 'KeyA':
-            movement[2] = false;
-            break;
-        case 'KeyD':
-            movement[3] = false;
+        case 2: // Right mouse click
+
             break;
     }
 });*/
+
+function toogleTextures() {
+    if (textureFlag) {
+        textureFlag = false;
+        everything.forEach(function (planet) {
+            planet.instance.material = planet.basic;
+        });
+    } else {
+        textureFlag = true;
+        everything.forEach(function (planet) {
+            planet.instance.material = planet.material;
+        });
+    }
+}
+
+function toggleLightning() {
+    if (lightningFlag) {
+        lightningFlag = false;
+        sun.light.intensity = 0;
+    } else {
+        lightningFlag = true;
+        sun.light.intensity = sun.lightIntensity;
+    }
+}
+
+function togglePause() {
+    pause = !pause;
+}
+

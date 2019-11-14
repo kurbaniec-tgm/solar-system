@@ -25,6 +25,9 @@ Sun Orbit: 686,98 days = 59355072000 ms
 Rotation: 27,32 days = 2360448000 ms
 Earth Orbit: 27,32 days = 2360448000 ms
 ---
+# Jupiter
+Rotation: 9.93 days = 857952000 ms
+Sun Orbit: 11,862 years = 374080032000 ms
 
 Planetary size ratios
 https://nssdc.gsfc.nasa.gov/planetary/factsheet/planet_table_ratio.html
