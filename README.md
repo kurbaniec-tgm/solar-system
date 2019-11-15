@@ -26,6 +26,14 @@ npm run start
 wasm-pack test --headless --firefox
 ```
 
+### Documentation
+
+```
+cargo doc --no-deps --target-dir docs/wasm
+cd www
+npm run doc
+```
+
 ## Sources
 * [Three.js](https://threejs.org/)
 * [Textures](https://www.solarsystemscope.com/textures/)

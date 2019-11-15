@@ -265,7 +265,7 @@ animate();
 /**
  * Defines the simulation loop of the solar-system.
  */
-function animate() {
+export function animate() {
     requestAnimationFrame(animate);
     // Get elapsed time
     const delta = clock.getDelta();
@@ -306,7 +306,7 @@ function animate() {
 /**
  * Defines a listener for user interactions.
  */
-document.addEventListener('keydown', (e) => {
+export function inputHandler(e) {
     switch (e.code) {
         case 'ArrowUp':     // Increase simulation speed
             simulation.increase_speed();
@@ -324,12 +324,13 @@ document.addEventListener('keydown', (e) => {
             togglePause();
             break;
     }
-});
+}
+document.addEventListener('keydown', (e) => inputHandler(e));
 
 /**
  * Enables or disables the use of textures.
  */
-function toggleTextures() {
+export function toggleTextures() {
     if (textureFlag) {
         textureFlag = false;
         everything.forEach(function (planet) {
@@ -346,7 +347,7 @@ function toggleTextures() {
 /**
  * Enables or disables the use of lightning.
  */
-function toggleLightning() {
+export function toggleLightning() {
     if (lightningFlag) {
         lightningFlag = false;
         sun.light.intensity = 0;
@@ -359,16 +360,19 @@ function toggleLightning() {
 /**
  * Pauses or continues the simulation.
  */
-function togglePause() {
+export function togglePause() {
     pause = !pause;
 }
 
 /**
  * Updates the Three.js renderer, when the browser window size changes.
  */
-window.onresize = function () {
+export function onResize () {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize( window.innerWidth, window.innerHeight );
-};
+}
+window.addEventListener("resize", onResize);
+
+//export default {animate, inputHandler, toggleTextures, toggleLightning, togglePause, onResize}
 

@@ -3,16 +3,14 @@
   "version": "0.1.0",
   "description": "Solar system simulation",
   "main": "index.js",
-  "bin": {
-    "create-wasm-app": ".bin/create-wasm-app.js"
-  },
   "scripts": {
     "build": "webpack --config webpack.config.js",
-    "start": "webpack-dev-server"
+    "start": "webpack-dev-server",
+    "doc": "./node_modules/.bin/esdoc"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rustwasm/create-wasm-app.git"
+    "url": "git+https://github.com/kurbaniec-tgm/solar-system.git"
   },
   "keywords": [
     "webassembly",
@@ -23,11 +21,13 @@
   "author": "Kacper Urbaniec <at.kacper.urbaniec@gmail.com>",
   "license": "MIT",
   "devDependencies": {
+    "copy-webpack-plugin": "^5.0.0",
+    "esdoc": "^1.1.0",
+    "esdoc-standard-plugin": "^1.0.0",
     "solar-system": "file:../pkg",
+    "three": "^0.110.0",
     "webpack": "^4.29.3",
     "webpack-cli": "^3.1.0",
-    "webpack-dev-server": "^3.1.5",
-    "copy-webpack-plugin": "^5.0.0",
-    "three": "^0.110.0"
+    "webpack-dev-server": "^3.1.5"
   }
 }
