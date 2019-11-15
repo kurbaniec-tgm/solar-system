@@ -1,20 +1,11 @@
 import * as wasm from "solar-system";
 import * as THREE from "three";
-import * as LOADER from "three-obj-loader"
-import {OBJLoader} from "three/examples/jsm/loaders/OBJLoader";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import Stats from 'three/examples/jsm/libs/stats.module';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
-import {FirstPersonControls} from "three/examples/jsm/controls/FirstPersonControls";
-import {FlyControls} from "three/examples/jsm/controls/FlyControls";
-import {Vector3} from "three";
-import {PointerLockControls} from "three/examples/jsm/controls/PointerLockControls";
-import {Euler} from "three";
 
-// Initialize WebAssembly
+
+// WebAssembly initialization
 const simulation = new wasm.Simulation();
-console.log("Radiant: " + simulation.earth_rotation(1.0));
 
 // Three.js initialization
 const clock = new THREE.Clock();
@@ -29,13 +20,12 @@ renderer.gammaOutput = true;
 renderer.gammaFactor = 2.2;
 container.appendChild( renderer.domElement );
 const scene = new THREE.Scene();
-
 const camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 1, 1000000 );
 // Note: x is forward/backward, z is left/right, y is top/bottom
 camera.position.set( -15000, 7000, -3300 );
 camera.rotation.set(-2.2578094173636574, -1.004615448774449, -2.3419978296978265, "XYZ");
-
 const controls = new OrbitControls( camera, renderer.domElement );
+// Set keybindings for moving the camera to "WASD" instead of Arrow-Keys
 controls.keys = {
     LEFT: 65, // A
     UP: 87, // W
@@ -54,6 +44,11 @@ let textureFlag = true;
 let lightningFlag = true;
 // Flag that determines if simulation is paused
 let pause = false;
+
+// Define objects of the solar-system
+// Every object is a Three.js mesh with a an appropriate texture loaded.
+// When textures are disabled, a basic material is loaded with a color as placeholder.
+// The simulation features one light source found in the sun that can be toggled.
 
 // GALAXY
 const galaxy = new (function () {
@@ -148,7 +143,7 @@ const earth = new (function() {
     planets.push(this);
     everything.push(this);
 })();
-// MOON orbits earth
+// MOON
 const moon = new (function() {
     this.radius = 86.855;
     this.texture = textureLoader.load("resources/moon.jpg");
@@ -267,77 +262,74 @@ const neptune = new (function() {
 
 animate();
 
-window.onresize = function () {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize( window.innerWidth, window.innerHeight );
-};
-
-// Simulation loop
+/**
+ * Defines the simulation loop of the solar-system.
+ */
 function animate() {
     requestAnimationFrame(animate);
     // Get elapsed time
     const delta = clock.getDelta();
+    // Unless simulation is not stopped
     if (!pause) {
-        // Perform sun operations
+        // Rotate sun around its axis
         sun.instance.rotateY(sun.ownRotation(delta));
-        // Perform moon operations
+        // Get axis and earth rotation in radians of the moon
         const moonRotation = moon.rotation(delta);
+        // Rotate moon around the earth
         moon.theta += moonRotation;
         moon.instance.position.x = earth.instance.position.x + moon.earthDistance * Math.cos(moon.theta);
         moon.instance.position.z = earth.instance.position.z + moon.earthDistance * Math.sin(moon.theta);
+        // Rotate moon around its axis
         moon.instance.rotateY(moonRotation);
         // Perform operations on all planets that orbit the sun
         planets.forEach(function (planet) {
+            // Rotate planet around its own axis
             planet.instance.rotateY(planet.ownRotation(delta));
+            // Update stored angle for sun rotation
             planet.theta += planet.sunRotation(delta);
+            // If the stored angle is more than a full rotation (2*Pi), subtract it to hinder overflowing
             if (planet.theta > fullRotation) {
                 planet.theta -= fullRotation;
             }
+            // Rotate planet around the sun
             planet.instance.position.x = planet.sunDistance * Math.cos(planet.theta);
             planet.instance.position.z = planet.sunDistance * Math.sin(planet.theta);
         });
     }
+    // Update Three.js properties
     controls.update(delta);
     camera.clearViewOffset();
     stats.update();
     renderer.render(scene, camera);
 }
 
-
+/**
+ * Defines a listener for user interactions.
+ */
 document.addEventListener('keydown', (e) => {
     switch (e.code) {
-        case 'ArrowUp':
+        case 'ArrowUp':     // Increase simulation speed
             simulation.increase_speed();
             break;
-        case 'ArrowDown':
+        case 'ArrowDown':   // Reduce simulation speed
             simulation.reduce_speed();
             break;
-        case 'KeyT':
-            toogleTextures();
+        case 'KeyT':        // Turn textures on/off
+            toggleTextures();
             break;
-        case 'KeyL':
+        case 'KeyL':        // Turn lightning on/off
             toggleLightning();
             break;
-        case 'Space':
+        case 'Space':       // Pause/Continue simulation
             togglePause();
             break;
     }
 });
 
 /**
-document.addEventListener('mousedown', (e) => {
-    switch (e.button) {
-        case 0: // Left mouse click
-            toogleTextures();
-            break;
-        case 2: // Right mouse click
-
-            break;
-    }
-});*/
-
-function toogleTextures() {
+ * Enables or disables the use of textures.
+ */
+function toggleTextures() {
     if (textureFlag) {
         textureFlag = false;
         everything.forEach(function (planet) {
@@ -351,6 +343,9 @@ function toogleTextures() {
     }
 }
 
+/**
+ * Enables or disables the use of lightning.
+ */
 function toggleLightning() {
     if (lightningFlag) {
         lightningFlag = false;
@@ -361,7 +356,19 @@ function toggleLightning() {
     }
 }
 
+/**
+ * Pauses or continues the simulation.
+ */
 function togglePause() {
     pause = !pause;
 }
+
+/**
+ * Updates the Three.js renderer, when the browser window size changes.
+ */
+window.onresize = function () {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize( window.innerWidth, window.innerHeight );
+};
 
