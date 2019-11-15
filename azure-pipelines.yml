@@ -37,8 +37,8 @@ jobs:
    steps:
       - task: GitHubRelease@1
         inputs:
-          gitHubConnection: kurbaniec
-          repositoryName: kurbaniec-tgm/solar-system
+          gitHubConnection: 'kurbaniec'
+          repositoryName: '$(Build.Repository.Name)'
           action: 'create'
           target: '$(Build.SourceVersion)'
           tagSource: 'gitTag'
