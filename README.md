@@ -7,6 +7,7 @@
 </h1>
 
 <h4 align="center">A simple solar system simulation.</h4>
+
 ## 🛠️ Build
 
 ```
