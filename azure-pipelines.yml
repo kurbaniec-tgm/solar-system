@@ -44,4 +44,4 @@ jobs:
           tagSource: 'gitTag'
           changeLogCompareToRelease: 'lastFullRelease'
           changeLogType: 'commitBased'
-          assets: $(Build.SourcesDirectory)/dist
+          assets: $(Build.SourcesDirectory)/www/dist
