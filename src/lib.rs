@@ -22,6 +22,13 @@ pub struct Simulation {
     speed: u64
 }
 
+impl Simulation {
+    /// Sets the speed of the simulation
+    pub fn set_speed(&mut self, speed: u64) {
+        self.speed = speed;
+    }
+}
+
 #[wasm_bindgen]
 impl Simulation {
     /// Creates a new simulation object.
@@ -30,6 +37,11 @@ impl Simulation {
     pub fn new() -> Simulation {
         utils::set_panic_hook();
         Simulation { speed: 10000000}
+    }
+
+    /// Returns the current set speed.
+    pub fn get_speed(&self) -> u64 {
+        self.speed
     }
 
     /// Reduces the speed of the simulation to a tenth of the current one.
