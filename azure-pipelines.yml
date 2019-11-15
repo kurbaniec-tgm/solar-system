@@ -30,3 +30,18 @@ jobs:
         npm install
         npm run build
       displayName: 'Building Node App'
+
+ - job: Create_Solar_System_Release
+   displayName: "Create_Solar_System_Release"
+   dependsOn: Build_Solar_System
+   steps:
+      - task: GitHubRelease@1
+        inputs:
+          gitHubConnection: kurbaniec-tgm
+          repositoryName: kurbaniec-tgm/solar-system
+          action: 'create'
+          target: '$(Build.SourceVersion)'
+          tagSource: 'gitTag'
+          changeLogCompareToRelease: 'lastFullRelease'
+          changeLogType: 'commitBased'
+          assets: $(Build.SourcesDirectory)/dist
