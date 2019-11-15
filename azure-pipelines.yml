@@ -30,6 +30,11 @@ jobs:
         npm install
         npm run build
       displayName: 'Building Node App'
+    - task: CopyFiles@2
+      inputs:
+        SourceFolder: '$(Build.SourcesDirectory)/www/dist'
+        Contents: '**'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
  - job: Create_Solar_System_Release
    displayName: "Create_Solar_System_Release"
@@ -44,4 +49,4 @@ jobs:
           tagSource: 'gitTag'
           changeLogCompareToRelease: 'lastFullRelease'
           changeLogType: 'commitBased'
-          assets: $(Build.SourcesDirectory)/www/dist
+          assets: '$(Build.ArtifactStagingDirectory)'
