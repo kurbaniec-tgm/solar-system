@@ -1,32 +1,43 @@
-<div align="center">
+<h1 align="center">
+  <br>
+  <img src="images/solar-systen-demo.gif" alt="solar-system" width="500"></a>
+  <br>
+  solar-system
+  <br>
+</h1>
 
-  <h1><code>solar-system</code></h1>
-
-  <strong>A simple solar system simulation</strong>
-
-  <sub>Built with Js and 🦀🕸 by Kacper Urbaniec</sub>
-</div>
-
-## About
-Simple solar system simulation
-
-## 🚴 Usage
-
-### 🛠️ Build and Run
+<h4 align="center">A simple solar system simulation.</h4>
+## 🛠️ Build
 
 ```
 wasm-pack build --release --no-typescript
 cd www
+npm install
+```
+
+## 🚴 Run
+```
+cd www
 npm run start
 ```
 
-### 🔬 Test in Headless Browsers with `wasm-pack test`
+## ✨ Features
+
+While running the simulation, following keybindings can used to interact:
+
+* `Arrow Up` - Increases simulation speed
+* `Arrow Up` - Reduces simulation speed
+* `Space` - Pauses / Continues simulation
+* `T` - Enables / Disables textures
+* `L` - Enables / Disables lightning
+
+## 🔬 Test
 
 ```
 wasm-pack test --headless --firefox
 ```
 
-### Documentation
+## 📚 Documentation
 
 ```
 cargo doc --no-deps --target-dir docs/wasm
@@ -41,3 +52,12 @@ npm run doc
 * [Rotation](https://codepen.io/cl4ws0n/pen/eJjQzx?editors=1010)
 * [Earth-Moon Rotation](https://mattloftus.github.io/2016/02/03/threejs-p2/)
 * [Switch Controls](https://stackoverflow.com/questions/11304998/switch-threejs-controls-from-trackball-to-flycontrols-and-vice-versa)
+
+## License
+
+MIT
+
+---
+
+> GitHub [kurbaniec](https://github.com/kurbaniec-tgm) &nbsp;&middot;&nbsp;
+> Mail [at.kacper.urbaniec@gmail.com](mailto:at.kacper.urbaniec@gmail.com)

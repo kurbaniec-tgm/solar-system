@@ -10,7 +10,9 @@ const simulation = new wasm.Simulation();
 // Three.js initialization
 const clock = new THREE.Clock();
 const fullRotation = 2*Math.PI;
-const container = document.getElementById( 'container' );
+//const container = document.getElementById( 'container' );
+const container = document.createElement('div');
+document.body.appendChild(container);
 const stats = new Stats();
 container.appendChild( stats.dom );
 const renderer = new THREE.WebGLRenderer( { antialias: true } );
