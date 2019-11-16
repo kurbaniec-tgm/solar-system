@@ -49,4 +49,4 @@ jobs:
           tagSource: 'gitTag'
           changeLogCompareToRelease: 'lastFullRelease'
           changeLogType: 'commitBased'
-          assets: '$(Build.ArtifactStagingDirectory)'
+          assets: '$(Build.ArtifactStagingDirectory)/*'
