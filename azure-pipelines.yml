@@ -30,12 +30,13 @@ jobs:
         npm install
         npm run build
       displayName: 'Building Node App'
-    - task: CopyFiles@2
+    - task: ArchiveFiles@2
       inputs:
-        SourceFolder: '$(Build.SourcesDirectory)/www/dist'
-        Contents: '**'
-        TargetFolder: '$(Build.ArtifactStagingDirectory)'
-    
+        rootFolderOrFile: '$(Build.SourcesDirectory)/www/dist'
+        includeRootFolder: false
+        archiveType: 'zip'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/solar-system.zip'
+        replaceExistingArchive: true 
     - task: GitHubRelease@1
       inputs:
         gitHubConnection: 'kurbaniec-release'
