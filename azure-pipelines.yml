@@ -35,14 +35,14 @@ jobs:
         SourceFolder: '$(Build.SourcesDirectory)/www/dist'
         Contents: '**'
         TargetFolder: '$(Build.ArtifactStagingDirectory)'
+    
     - task: GitHubRelease@1
-        inputs:
-          gitHubConnection: 'kurbaniec-release'
-          repositoryName: 'kurbaniec-tgm/solar-system'
-          action: 'create'
-          target: '$(Build.SourceVersion)'
-          tagSource: 'gitTag'
-          changeLogCompareToRelease: 'lastFullRelease'
-          changeLogType: 'commitBased'
-          assets: '$(Build.ArtifactStagingDirectory)/*'
-      
+      inputs:
+        gitHubConnection: 'kurbaniec-release'
+        repositoryName: 'kurbaniec-tgm/solar-system'
+        action: 'create'
+        target: '$(Build.SourceVersion)'
+        tagSource: 'gitTag'
+        changeLogCompareToRelease: 'lastFullRelease'
+        changeLogType: 'commitBased'
+        assets: '$(Build.ArtifactStagingDirectory)/*'
