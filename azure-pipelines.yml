@@ -35,12 +35,7 @@ jobs:
         SourceFolder: '$(Build.SourcesDirectory)/www/dist'
         Contents: '**'
         TargetFolder: '$(Build.ArtifactStagingDirectory)'
-
- - job: Create_Solar_System_Release
-   displayName: "Create_Solar_System_Release"
-   dependsOn: Build_Solar_System
-   steps:
-      - task: GitHubRelease@1
+    - task: GitHubRelease@1
         inputs:
           gitHubConnection: 'kurbaniec-release'
           repositoryName: 'kurbaniec-tgm/solar-system'
@@ -50,3 +45,4 @@ jobs:
           changeLogCompareToRelease: 'lastFullRelease'
           changeLogType: 'commitBased'
           assets: '$(Build.ArtifactStagingDirectory)/*'
+      
